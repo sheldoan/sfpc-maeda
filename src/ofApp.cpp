@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
     ofBackground(0);
-    font.load("DIN Alternate Bold.ttf", 30, true, true, true);
+    font.load("AVHersheySimplexLight.otf", 100, true, true, true);
     
     gui.setup();
     gui.add(letterSpacing.set("letterSpacing", 1, 0, 20));
@@ -27,6 +27,8 @@ void ofApp::draw(){
 
     ofSetColor(255);
     ofFill();
+    
+//    font.drawStringAsShapes(topRow, x, y);
     
     ofPushMatrix();
     ofTranslate(x, y);
