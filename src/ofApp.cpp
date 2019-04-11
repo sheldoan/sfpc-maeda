@@ -10,6 +10,8 @@ void ofApp::setup() {
     gui.add(resampleCount.set("resampleCount", 30, 1, 100));
     gui.add(dotRadius.set("dotRadius", 2, 0.1, 10));
     gui.add(hersheyScale.set("hersheyScale", 3, 0.1, 10));
+    gui.add(animationLength.set("animationLength", 0.5, 1, 10));
+    gui.add(maxVerticalDisplacement.set("maxVertDisplacement", 20, 10, 100));
     
     hersheyFont.setColor(255);
 }
@@ -33,17 +35,25 @@ void ofApp::draw(){
     ofTranslate(x, y);
 
     vector<ofPath> paths = hersheyFont.getPaths(topRow, hersheyScale);
-    int index = 0;
-    for (ofPath letter : paths) {
-//        cout << "Letter " << topRow.at(index) << " has " << letter.getOutline().size() << " lines " << endl;
-
+    for (int i = 0; i < paths.size(); i++) {
+        float timeElapsed = 0;
+        
+        auto iterator = keyToTimeElapsed.find(topRow[i]);
+        if (iterator != keyToTimeElapsed.end()) {
+            timeElapsed = ofGetElapsedTimef() - iterator->second;
+            if (timeElapsed > animationLength) {
+                keyToTimeElapsed.erase(topRow[i]);
+                timeElapsed = 0;
+            }
+        }
+        
+        ofPath letter = paths.at(i);
         int pointsToSamplePerLine = resampleCount / letter.getOutline().size();
         for (ofPolyline line : letter.getOutline()) {
             for (glm::vec3 point : line.getResampledByCount(pointsToSamplePerLine)) {
-                ofDrawCircle(point.x, point.y, dotRadius);
+                ofDrawCircle(point.x, point.y - maxVerticalDisplacement*sin(ofMap(timeElapsed, 0, animationLength, 0, PI)), dotRadius);
             }
         }
-        index++;
     }
     
     ofPopMatrix();
@@ -61,7 +71,9 @@ ofRectangle ofApp::getBoundingBoxOfPath(ofPath &path) {
 }
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    
+    if (key >= 'a' || key <= 'z') {
+        keyToTimeElapsed.insert(make_pair(key, ofGetElapsedTimef()));
+    }
 }
 
 //--------------------------------------------------------------

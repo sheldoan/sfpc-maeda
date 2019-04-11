@@ -33,4 +33,8 @@ class ofApp : public ofBaseApp{
     ofParameter<int> resampleCount;
     ofParameter<float> dotRadius;
     ofParameter<float> hersheyScale;
+    ofParameter<float> animationLength;
+    ofParameter<float> maxVerticalDisplacement;
+    
+    map<int, float> keyToTimeElapsed;
 };
