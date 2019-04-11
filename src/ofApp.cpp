@@ -10,8 +10,9 @@ void ofApp::setup() {
     gui.add(resampleCount.set("resampleCount", 30, 1, 100));
     gui.add(dotRadius.set("dotRadius", 2, 0.1, 10));
     gui.add(hersheyScale.set("hersheyScale", 3, 0.1, 10));
-    gui.add(animationLength.set("animationLength", 0.5, 1, 10));
+    gui.add(animationLength.set("animationLength", 0.25, 0.1, 1.5));
     gui.add(maxVerticalDisplacement.set("maxVertDisplacement", 20, 10, 100));
+    gui.add(maxScaleFactor.set("maxScaleFactor", 2, 1, 10));
     
     hersheyFont.setColor(255);
 }
@@ -37,7 +38,7 @@ void ofApp::draw(){
     vector<ofPath> paths = hersheyFont.getPaths(topRow, hersheyScale);
     for (int i = 0; i < paths.size(); i++) {
         float timeElapsed = 0;
-        
+
         auto iterator = keyToTimeElapsed.find(topRow[i]);
         if (iterator != keyToTimeElapsed.end()) {
             timeElapsed = ofGetElapsedTimef() - iterator->second;
@@ -48,10 +49,24 @@ void ofApp::draw(){
         }
         
         ofPath letter = paths.at(i);
+        float xOffset = 0;
+        float scaleFactor = hersheyScale;
+        if (timeElapsed > 0) {
+            scaleFactor = ofMap(timeElapsed, 0, animationLength, hersheyScale, maxScaleFactor*hersheyScale, true);
+            string currLetter = topRow.substr(i, i+1);
+            ofPath scaledLetter = hersheyFont.getPaths(currLetter, scaleFactor).at(0);
+//            xOffset = hersheyFont.getWidth(currLetter, scaleFactor) * 0.5;
+            cout << "xOffset for " << currLetter << " is: " << xOffset << endl;
+            letter = scaledLetter;
+            //letter.scale(scaleFactor, scaleFactor);
+        }
+        
+        
         int pointsToSamplePerLine = resampleCount / letter.getOutline().size();
         for (ofPolyline line : letter.getOutline()) {
             for (glm::vec3 point : line.getResampledByCount(pointsToSamplePerLine)) {
-                ofDrawCircle(point.x, point.y - maxVerticalDisplacement*sin(ofMap(timeElapsed, 0, animationLength, 0, PI)), dotRadius);
+                float yDisplacement = maxVerticalDisplacement*sin(ofMap(timeElapsed, 0, animationLength, 0, PI));
+                ofDrawCircle(point.x - xOffset, point.y - yDisplacement, dotRadius);
             }
         }
     }

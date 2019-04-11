@@ -35,6 +35,7 @@ class ofApp : public ofBaseApp{
     ofParameter<float> hersheyScale;
     ofParameter<float> animationLength;
     ofParameter<float> maxVerticalDisplacement;
+    ofParameter<float> maxScaleFactor;
     
     map<int, float> keyToTimeElapsed;
 };
