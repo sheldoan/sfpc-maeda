@@ -3,10 +3,12 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
     ofBackground(0);
-    font.load("DIN Alternate Bold.ttf", 100, true, true, true);
+    font.load("DIN Alternate Bold.ttf", 30, true, true, true);
     
     gui.setup();
     gui.add(letterSpacing.set("letterSpacing", 1, 0, 20));
+    gui.add(resampleCount.set("resampleCount", 3, 1, 30));
+    gui.add(dotRadius.set("dotRadius", 2, 0.1, 10));
 }
 
 //--------------------------------------------------------------
@@ -25,12 +27,22 @@ void ofApp::draw(){
 
     ofSetColor(255);
     ofFill();
-    ofDrawCircle(x, y, 10);
-    font.drawStringAsShapes(topRow, x, y);
-    ofDrawCircle(ofGetWidth()/2, ofGetHeight()/2, 10);
     
-    ofNoFill();
-    ofDrawRectangle(font.getStringBoundingBox(topRow, x, y));
+    ofPushMatrix();
+    ofTranslate(x, y);
+    
+    vector<ofPath> letters = font.getStringAsPoints(topRow, false, false);
+    for (ofPath letter : letters) {
+        vector<ofPolyline> lines = letter.getOutline();
+        for (ofPolyline line : lines) {
+            line = line.getResampledByCount(resampleCount);
+            vector<glm::vec3> points = line.getVertices();
+            for (glm::vec3 point : points) {
+                ofDrawCircle(point.x, point.y, dotRadius);
+            }
+        }
+    }
+    ofPopMatrix();
     gui.draw();
 }
 

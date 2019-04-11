@@ -24,7 +24,9 @@ class ofApp : public ofBaseApp{
 		
 
     ofTrueTypeFont font;
-
+    
     ofxPanel gui;
-    ofParameter<float> letterSpacing; 
+    ofParameter<float> letterSpacing;
+    ofParameter<int> resampleCount;
+    ofParameter<float> dotRadius;
 };
