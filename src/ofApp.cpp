@@ -9,6 +9,8 @@ void ofApp::setup() {
     gui.add(letterSpacing.set("letterSpacing", 1, 0, 20));
     gui.add(resampleCount.set("resampleCount", 3, 1, 30));
     gui.add(dotRadius.set("dotRadius", 2, 0.1, 10));
+    
+    hersheyFont.setColor(255);
 }
 
 //--------------------------------------------------------------
@@ -19,35 +21,37 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     string topRow = "qwertyuiop";
-    font.setLetterSpacing(letterSpacing);
-    ofRectangle bounds = font.getStringBoundingBox(topRow, 0, 0);
     
-    float x = (ofGetWidth() - bounds.getWidth()) / 2;
-    float y = ofGetHeight()*0.5 + bounds.getHeight()*0.5;
-
     ofSetColor(255);
     ofFill();
+
+    ofPath path = hersheyFont.getPath(topRow, 3);
     
-//    font.drawStringAsShapes(topRow, x, y);
-    
+    float x = (ofGetWidth() - getBoundingBoxOfPath(path).getWidth()) * 0.5;
+    float y = ofGetHeight() * 0.5;
+
     ofPushMatrix();
     ofTranslate(x, y);
     
-    vector<ofPath> letters = font.getStringAsPoints(topRow, false, false);
-    for (ofPath letter : letters) {
-        vector<ofPolyline> lines = letter.getOutline();
-        for (ofPolyline line : lines) {
-            line = line.getResampledByCount(resampleCount);
-            vector<glm::vec3> points = line.getVertices();
-            for (glm::vec3 point : points) {
-                ofDrawCircle(point.x, point.y, dotRadius);
-            }
+    for (ofPolyline line : path.getOutline()) {
+        for (glm::vec3 point : line.getResampledByCount(resampleCount)) {
+            ofDrawCircle(point.x, point.y, dotRadius);
         }
     }
+    
     ofPopMatrix();
     gui.draw();
 }
 
+ofRectangle ofApp::getBoundingBoxOfPath(ofPath &path) {
+    ofRectangle rect;
+    for (int i=0; i<path.getOutline().size(); i++) {
+        ofRectangle b = path.getOutline().at(i).getBoundingBox();
+        if (i==0) rect = b;
+        else rect.growToInclude(b);
+    }
+    return rect;
+}
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     
