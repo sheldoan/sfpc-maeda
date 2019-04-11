@@ -7,8 +7,9 @@ void ofApp::setup() {
     
     gui.setup();
     gui.add(letterSpacing.set("letterSpacing", 1, 0, 20));
-    gui.add(resampleCount.set("resampleCount", 3, 1, 30));
+    gui.add(resampleCount.set("resampleCount", 30, 1, 100));
     gui.add(dotRadius.set("dotRadius", 2, 0.1, 10));
+    gui.add(hersheyScale.set("hersheyScale", 3, 0.1, 10));
     
     hersheyFont.setColor(255);
 }
@@ -25,18 +26,24 @@ void ofApp::draw(){
     ofSetColor(255);
     ofFill();
 
-    ofPath path = hersheyFont.getPath(topRow, 3);
-    
-    float x = (ofGetWidth() - getBoundingBoxOfPath(path).getWidth()) * 0.5;
+    float x = (ofGetWidth() - hersheyFont.getWidth(topRow, hersheyScale)) * 0.5;
     float y = ofGetHeight() * 0.5;
 
     ofPushMatrix();
     ofTranslate(x, y);
-    
-    for (ofPolyline line : path.getOutline()) {
-        for (glm::vec3 point : line.getResampledByCount(resampleCount)) {
-            ofDrawCircle(point.x, point.y, dotRadius);
+
+    vector<ofPath> paths = hersheyFont.getPaths(topRow, hersheyScale);
+    int index = 0;
+    for (ofPath letter : paths) {
+//        cout << "Letter " << topRow.at(index) << " has " << letter.getOutline().size() << " lines " << endl;
+
+        int pointsToSamplePerLine = resampleCount / letter.getOutline().size();
+        for (ofPolyline line : letter.getOutline()) {
+            for (glm::vec3 point : line.getResampledByCount(pointsToSamplePerLine)) {
+                ofDrawCircle(point.x, point.y, dotRadius);
+            }
         }
+        index++;
     }
     
     ofPopMatrix();

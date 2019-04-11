@@ -22,14 +22,15 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+    
     ofRectangle getBoundingBoxOfPath(ofPath &path);
 
     ofxHersheyFont hersheyFont;
-    
     ofTrueTypeFont font;
     
     ofxPanel gui;
     ofParameter<float> letterSpacing;
     ofParameter<int> resampleCount;
     ofParameter<float> dotRadius;
+    ofParameter<float> hersheyScale;
 };
