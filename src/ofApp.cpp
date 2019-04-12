@@ -30,10 +30,10 @@ void ofApp::draw(){
     
     ofSetColor(255);
     ofFill();
-    ofDrawCircle(0, 0, 10); // debug
+    
     ofPushMatrix();
     ofTranslate(-hersheyFont.getWidth(topRow, hersheyScale) * 0.5, 0);
-    ofDrawCircle(0, 0, 5); // debug
+    
     vector<ofPath> paths = hersheyFont.getPaths(topRow, hersheyScale);
     for (int i = 0; i < paths.size(); i++) {
         float timeElapsed = 0;
@@ -53,28 +53,21 @@ void ofApp::draw(){
             continue;
         }
         float scaleFactor = ofMap(timeElapsed, 0, animationLength, hersheyScale, maxScaleFactor*hersheyScale, true);
-        string currLetter = topRow.substr(i, i+1);
+        string currLetter = topRow.substr(i, 1);
         ofPath scaledLetter = hersheyFont.getPaths(currLetter, scaleFactor).at(0);
         
         string strTilNow = topRow.substr(0, i);
         float widthTilNow = hersheyFont.getWidth(strTilNow, hersheyScale);
         float widthOfScaledLetter = hersheyFont.getWidth(currLetter, scaleFactor);
-        cout << strTilNow << " has width: " << widthTilNow << endl;
-        
-        scaledLetter.draw(); // debug
-//            xOffset = hersheyFont.getWidth(currLetter, scaleFactor) * 0.5;
-//            cout << "xOffset for " << currLetter << " is: " << xOffset << endl;
+
+        float xOffset = widthTilNow - 0.5*widthOfScaledLetter;
         letter = scaledLetter;
-        //letter.scale(scaleFactor, scaleFactor);
         
         int pointsToSamplePerLine = resampleCount / letter.getOutline().size();
         for (ofPolyline line : letter.getOutline()) {
             for (glm::vec3 point : line.getResampledByCount(pointsToSamplePerLine)) {
                 float yDisplacement = maxVerticalDisplacement*sin(ofMap(timeElapsed, 0, animationLength, 0, PI));
-//                ofPushMatrix();
-//                ofTranslate(0, 0, ofRandom(0, 30));
-                ofDrawCircle(point.x + widthTilNow, point.y - yDisplacement, dotRadius);
-//                ofPopMatrix();
+                ofDrawCircle(point.x + xOffset, point.y - yDisplacement, dotRadius);
             }
         }
     }
