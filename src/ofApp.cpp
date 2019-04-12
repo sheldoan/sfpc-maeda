@@ -15,6 +15,7 @@ void ofApp::setup() {
     gui.add(maxScaleFactor.set("maxScaleFactor", 2, 1, 10));
     
     hersheyFont.setColor(255);
+    easyCam.setScale(1, -1, 1);
 }
 
 //--------------------------------------------------------------
@@ -24,16 +25,14 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    easyCam.begin();
     string topRow = "qwertyuiop";
     
     ofSetColor(255);
     ofFill();
-
-    float x = (ofGetWidth() - hersheyFont.getWidth(topRow, hersheyScale)) * 0.5;
-    float y = ofGetHeight() * 0.5;
-
+    
     ofPushMatrix();
-    ofTranslate(x, y);
+    ofTranslate(-hersheyFont.getWidth(topRow, hersheyScale) * 0.5, 0);
 
     vector<ofPath> paths = hersheyFont.getPaths(topRow, hersheyScale);
     for (int i = 0; i < paths.size(); i++) {
@@ -56,7 +55,7 @@ void ofApp::draw(){
             string currLetter = topRow.substr(i, i+1);
             ofPath scaledLetter = hersheyFont.getPaths(currLetter, scaleFactor).at(0);
 //            xOffset = hersheyFont.getWidth(currLetter, scaleFactor) * 0.5;
-            cout << "xOffset for " << currLetter << " is: " << xOffset << endl;
+//            cout << "xOffset for " << currLetter << " is: " << xOffset << endl;
             letter = scaledLetter;
             //letter.scale(scaleFactor, scaleFactor);
         }
@@ -66,12 +65,21 @@ void ofApp::draw(){
         for (ofPolyline line : letter.getOutline()) {
             for (glm::vec3 point : line.getResampledByCount(pointsToSamplePerLine)) {
                 float yDisplacement = maxVerticalDisplacement*sin(ofMap(timeElapsed, 0, animationLength, 0, PI));
+                
+                if (timeElapsed > 0) {
+                    ofPushMatrix();
+                    ofTranslate(0, 0, ofRandom(0, 30));
+                }
                 ofDrawCircle(point.x - xOffset, point.y - yDisplacement, dotRadius);
+                if (timeElapsed > 0) {
+                    ofPopMatrix();
+                }
             }
         }
     }
     
     ofPopMatrix();
+    easyCam.end();
     gui.draw();
 }
 

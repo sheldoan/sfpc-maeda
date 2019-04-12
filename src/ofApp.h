@@ -38,4 +38,6 @@ class ofApp : public ofBaseApp{
     ofParameter<float> maxScaleFactor;
     
     map<int, float> keyToTimeElapsed;
+    
+    ofEasyCam easyCam;
 };
