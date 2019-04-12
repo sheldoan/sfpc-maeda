@@ -36,6 +36,7 @@ class ofApp : public ofBaseApp{
     ofParameter<float> animationLength;
     ofParameter<float> maxVerticalDisplacement;
     ofParameter<float> maxScaleFactor;
+    ofParameter<float> widthFactor;
     
     map<int, float> keyToTimeElapsed;
     

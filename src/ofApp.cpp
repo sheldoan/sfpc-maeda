@@ -1,4 +1,5 @@
 #include "ofApp.h"
+#include <cmath>
 
 //--------------------------------------------------------------
 void ofApp::setup() {
@@ -9,10 +10,11 @@ void ofApp::setup() {
     gui.add(letterSpacing.set("letterSpacing", 1, 0, 20));
     gui.add(resampleCount.set("resampleCount", 30, 1, 100));
     gui.add(dotRadius.set("dotRadius", 2, 0.1, 10));
-    gui.add(hersheyScale.set("hersheyScale", 3, 0.1, 10));
+    gui.add(hersheyScale.set("hersheyScale", 0.75, 0.1, 10));
     gui.add(animationLength.set("animationLength", 0.25, 0.1, 1.5));
-    gui.add(maxVerticalDisplacement.set("maxVertDisplacement", 20, 10, 100));
+    gui.add(maxVerticalDisplacement.set("maxVertDisplacement", 100, 10, 300));
     gui.add(maxScaleFactor.set("maxScaleFactor", 2, 1, 10));
+    gui.add(widthFactor.set("widthFactor", 0.175, 0, 5));
     
     hersheyFont.setColor(255);
     easyCam.setScale(1, -1, 1);
@@ -26,7 +28,7 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     easyCam.begin();
-    string topRow = "qwertyuiop";
+    string topRow = "q w e r t y u i o p";
     
     ofSetColor(255);
     ofFill();
@@ -52,7 +54,7 @@ void ofApp::draw(){
             letter.draw();
             continue;
         }
-        float scaleFactor = ofMap(timeElapsed, 0, animationLength, hersheyScale, maxScaleFactor*hersheyScale, true);
+        float scaleFactor = maxScaleFactor*hersheyScale*sin(ofMap(timeElapsed, 0, animationLength, 0, PI/2, true));
         string currLetter = topRow.substr(i, 1);
         ofPath scaledLetter = hersheyFont.getPaths(currLetter, scaleFactor).at(0);
         
@@ -60,14 +62,14 @@ void ofApp::draw(){
         float widthTilNow = hersheyFont.getWidth(strTilNow, hersheyScale);
         float widthOfScaledLetter = hersheyFont.getWidth(currLetter, scaleFactor);
 
-        float xOffset = widthTilNow - 0.5*widthOfScaledLetter;
+        float xOffset = widthTilNow - widthFactor*widthOfScaledLetter;
         letter = scaledLetter;
         
         int pointsToSamplePerLine = resampleCount / letter.getOutline().size();
         for (ofPolyline line : letter.getOutline()) {
             for (glm::vec3 point : line.getResampledByCount(pointsToSamplePerLine)) {
                 float yDisplacement = maxVerticalDisplacement*sin(ofMap(timeElapsed, 0, animationLength, 0, PI));
-                ofDrawCircle(point.x + xOffset, point.y - yDisplacement, dotRadius);
+                ofDrawCircle(point.x + xOffset, point.y - yDisplacement, dotRadius*sqrt(scaleFactor));
             }
         }
     }
