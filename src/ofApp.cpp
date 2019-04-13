@@ -7,7 +7,7 @@ void ofApp::setup() {
     font.load("AVHersheySimplexLight.otf", 100, true, true, true);
     
     gui.setup();
-    gui.add(letterSpacing.set("letterSpacing", 1, 0, 20));
+    gui.add(letterSpacing.set("letterSpacing", 5, 0.1, 20));
     gui.add(resampleCount.set("resampleCount", 30, 1, 100));
     gui.add(dotRadius.set("dotRadius", 2, 0.1, 10));
     gui.add(hersheyScale.set("hersheyScale", 0.75, 0.1, 10));
@@ -37,9 +37,11 @@ void ofApp::draw(){
     ofTranslate(-hersheyFont.getWidth(topRow, hersheyScale) * 0.5, 0);
     
     vector<ofPath> paths = hersheyFont.getPaths(topRow, hersheyScale);
+
+    map<char, vector<int>> charToPointCounts;
     for (int i = 0; i < paths.size(); i++) {
         float timeElapsed = 0;
-
+        
         auto iterator = keyToTimeElapsed.find(topRow[i]);
         if (iterator != keyToTimeElapsed.end()) {
             timeElapsed = ofGetElapsedTimef() - iterator->second;
@@ -48,13 +50,30 @@ void ofApp::draw(){
                 timeElapsed = 0;
             }
         }
-        
+    
+        char letterChar = topRow[i];
         ofPath letter = paths.at(i);
-        if (timeElapsed == 0) {
+        if (letterChar == ' ') {
             letter.draw();
             continue;
         }
-        float scaleFactor = maxScaleFactor*hersheyScale*sin(ofMap(timeElapsed, 0, animationLength, 0, PI/2, true));
+        
+        vector<int> countsPerLine;
+        for (ofPolyline line : letter.getOutline()) {
+            ofPolyline resampled = line.getResampledBySpacing(letterSpacing);
+            int count = resampled.getVertices().size();
+            countsPerLine.push_back(count);
+            cout << letterChar << " was resampled. " << line.getVertices().size() << " to " << count << endl;
+            
+//            for (glm::vec3 point : resampled.getVertices()) {
+//                ofDrawCircle(point.x, point.y, dotRadius);
+//            }
+        }
+        charToPointCounts.insert(make_pair(letterChar, countsPerLine));
+//        if (timeElapsed == 0) {
+//            continue;
+//        }
+        float scaleFactor = maxScaleFactor*sin(ofMap(timeElapsed, 0, animationLength, 0, PI/2, true)) + hersheyScale;
         string currLetter = topRow.substr(i, 1);
         ofPath scaledLetter = hersheyFont.getPaths(currLetter, scaleFactor).at(0);
         
@@ -65,12 +84,16 @@ void ofApp::draw(){
         float xOffset = widthTilNow - widthFactor*widthOfScaledLetter;
         letter = scaledLetter;
         
-        int pointsToSamplePerLine = resampleCount / letter.getOutline().size();
-        for (ofPolyline line : letter.getOutline()) {
-            for (glm::vec3 point : line.getResampledByCount(pointsToSamplePerLine)) {
+        vector<ofPolyline> lines = letter.getOutline();
+        for (int j = 0; j < lines.size(); j++) {
+            int pointCount = charToPointCounts[topRow[i]].at(j);
+            ofPolyline resampled = lines.at(j).getResampledByCount(pointCount);
+            for (int k = 0; k < resampled.size(); k++) {
+                glm::vec3 point = resampled.getVertices().at(k);
                 float yDisplacement = maxVerticalDisplacement*sin(ofMap(timeElapsed, 0, animationLength, 0, PI));
                 ofDrawCircle(point.x + xOffset, point.y - yDisplacement, dotRadius*sqrt(scaleFactor));
             }
+//            cout << currLetter << " in line has point count " << pointCount << endl;
         }
     }
     

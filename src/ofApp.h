@@ -24,7 +24,7 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
     
     ofRectangle getBoundingBoxOfPath(ofPath &path);
-
+    
     ofxHersheyFont hersheyFont;
     ofTrueTypeFont font;
     
@@ -39,6 +39,7 @@ class ofApp : public ofBaseApp{
     ofParameter<float> widthFactor;
     
     map<int, float> keyToTimeElapsed;
+   
     
     ofEasyCam easyCam;
 };
