@@ -9,7 +9,10 @@ class ofApp : public ofBaseApp{
 	public:
 		void setup();
 		void update();
-		void draw();
+    
+    void extracted(float baseScale, string &topRow);
+    
+    void draw();
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -22,21 +25,27 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-    
-    ofRectangle getBoundingBoxOfPath(ofPath &path);
+    void processText(float baseScale, string topRow, float letterSpacing);
     
     ofxHersheyFont hersheyFont;
     ofTrueTypeFont font;
     
     ofxPanel gui;
     ofParameter<float> letterSpacing;
-    ofParameter<int> resampleCount;
     ofParameter<float> dotRadius;
-    ofParameter<float> hersheyScale;
+    
+    ofParameter<float> topScale;
+    ofParameter<float> middleScale;
+    ofParameter<float> bottomScale;
+    
+    ofParameter<float> topToMiddlePadding;
+    ofParameter<float> middleToBottomPadding;
+    
     ofParameter<float> animationLength;
     ofParameter<float> maxVerticalDisplacement;
     ofParameter<float> maxScaleFactor;
     ofParameter<float> widthFactor;
+    
     
     map<int, float> keyToTimeElapsed;
    

@@ -8,9 +8,14 @@ void ofApp::setup() {
     
     gui.setup();
     gui.add(letterSpacing.set("letterSpacing", 5, 0.1, 20));
-    gui.add(resampleCount.set("resampleCount", 30, 1, 100));
     gui.add(dotRadius.set("dotRadius", 2, 0.1, 10));
-    gui.add(hersheyScale.set("hersheyScale", 0.75, 0.1, 10));
+    gui.add(topScale.set("topScale", 0.75, 0.1, 10));
+    gui.add(middleScale.set("middleScale", 1.5, 0.5, 10));
+    gui.add(bottomScale.set("bottomScale", 2.325, 0.5, 10));
+    
+    gui.add(topToMiddlePadding.set("topToMiddlePadding", 50, 0, 200));
+    gui.add(middleToBottomPadding.set("midToBottomPadding", 120, 0, 300));
+    
     gui.add(animationLength.set("animationLength", 0.25, 0.1, 1.5));
     gui.add(maxVerticalDisplacement.set("maxVertDisplacement", 100, 10, 300));
     gui.add(maxScaleFactor.set("maxScaleFactor", 2, 1, 10));
@@ -25,33 +30,23 @@ void ofApp::update(){
 
 }
 
-//--------------------------------------------------------------
-void ofApp::draw(){
-    easyCam.begin();
-    string topRow = "q w e r t y u i o p";
+void ofApp::processText(float baseScale, string text, float letterSpacing) {
+    vector<ofPath> paths = hersheyFont.getPaths(text, baseScale);
     
-    ofSetColor(255);
-    ofFill();
-    
-    ofPushMatrix();
-    ofTranslate(-hersheyFont.getWidth(topRow, hersheyScale) * 0.5, 0);
-    
-    vector<ofPath> paths = hersheyFont.getPaths(topRow, hersheyScale);
-
     map<char, vector<int>> charToPointCounts;
     for (int i = 0; i < paths.size(); i++) {
         float timeElapsed = 0;
         
-        auto iterator = keyToTimeElapsed.find(topRow[i]);
+        auto iterator = keyToTimeElapsed.find(text[i]);
         if (iterator != keyToTimeElapsed.end()) {
             timeElapsed = ofGetElapsedTimef() - iterator->second;
             if (timeElapsed > animationLength) {
-                keyToTimeElapsed.erase(topRow[i]);
+                keyToTimeElapsed.erase(text[i]);
                 timeElapsed = 0;
             }
         }
-    
-        char letterChar = topRow[i];
+        
+        char letterChar = text[i];
         ofPath letter = paths.at(i);
         if (letterChar == ' ') {
             letter.draw();
@@ -65,21 +60,21 @@ void ofApp::draw(){
             countsPerLine.push_back(count);
         }
         charToPointCounts.insert(make_pair(letterChar, countsPerLine));
-
-        float scaleFactor = maxScaleFactor*sin(ofMap(timeElapsed, 0, animationLength, 0, PI/2, true)) + hersheyScale;
-        string currLetter = topRow.substr(i, 1);
+        
+        float scaleFactor = maxScaleFactor*sin(ofMap(timeElapsed, 0, animationLength, 0, PI, true)) + baseScale;
+        string currLetter = text.substr(i, 1);
         ofPath scaledLetter = hersheyFont.getPaths(currLetter, scaleFactor).at(0);
         
-        string strTilNow = topRow.substr(0, i);
-        float widthTilNow = hersheyFont.getWidth(strTilNow, hersheyScale);
+        string strTilNow = text.substr(0, i);
+        float widthTilNow = hersheyFont.getWidth(strTilNow, baseScale);
         float widthOfScaledLetter = hersheyFont.getWidth(currLetter, scaleFactor);
-
+        
         float xOffset = widthTilNow - widthFactor*widthOfScaledLetter;
         letter = scaledLetter;
         
         vector<ofPolyline> lines = letter.getOutline();
         for (int j = 0; j < lines.size(); j++) {
-            int pointCount = charToPointCounts[topRow[i]].at(j);
+            int pointCount = charToPointCounts[text[i]].at(j);
             ofPolyline resampled = lines.at(j).getResampledByCount(pointCount + 1);
             for (int k = 0; k < resampled.size(); k++) {
                 glm::vec3 point = resampled.getVertices().at(k);
@@ -88,21 +83,37 @@ void ofApp::draw(){
             }
         }
     }
+}
+
+//--------------------------------------------------------------
+void ofApp::draw(){
+    easyCam.begin();
+    string topRow = "q w e r t y u i o p";
+    string middleRow = "a s d f g h j k l";
+    string bottomRow = "z x c v b n m ,";
     
+    ofSetColor(255);
+    ofFill();
+    
+    ofPushMatrix();
+    ofTranslate(-hersheyFont.getWidth(topRow, topScale) * 0.5, 0);
+    processText(topScale, topRow, 5);
     ofPopMatrix();
+    
+    ofPushMatrix();
+    ofTranslate(-hersheyFont.getWidth(middleRow, middleScale) * 0.5, hersheyFont.getHeight(topScale) + topToMiddlePadding);
+    processText(middleScale, middleRow, 5.75);
+    ofPopMatrix();
+    
+    ofPushMatrix();
+    ofTranslate(-hersheyFont.getWidth(bottomRow, bottomScale) * 0.5, hersheyFont.getHeight(bottomScale) + middleToBottomPadding);
+    processText(bottomScale, bottomRow, 8);
+    ofPopMatrix();
+    
     easyCam.end();
     gui.draw();
 }
 
-ofRectangle ofApp::getBoundingBoxOfPath(ofPath &path) {
-    ofRectangle rect;
-    for (int i=0; i<path.getOutline().size(); i++) {
-        ofRectangle b = path.getOutline().at(i).getBoundingBox();
-        if (i==0) rect = b;
-        else rect.growToInclude(b);
-    }
-    return rect;
-}
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     if (key >= 'a' || key <= 'z') {
