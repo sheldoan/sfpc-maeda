@@ -39,14 +39,14 @@ void ofApp::processText(float baseScale, string text, float letterSpacing, float
     vector<ofPath> paths = hersheyFont.getPaths(text, baseScale);
     map<char, vector<int>> charToPointCounts;
     for (int i = 0; i < paths.size(); i++) {
-        float timeElapsed = 0;
+        float timeElapsedFromKeyPress = 0;
         
         auto iterator = keyToTimeElapsed.find(text[i]);
         if (iterator != keyToTimeElapsed.end()) {
-            timeElapsed = ofGetElapsedTimef() - iterator->second;
-            if (timeElapsed > animationLength) {
+            timeElapsedFromKeyPress = ofGetElapsedTimef() - iterator->second;
+            if (timeElapsedFromKeyPress > animationLength) {
                 keyToTimeElapsed.erase(text[i]);
-                timeElapsed = 0;
+                timeElapsedFromKeyPress = 0;
             }
         }
         
@@ -65,7 +65,7 @@ void ofApp::processText(float baseScale, string text, float letterSpacing, float
         }
         charToPointCounts.insert(make_pair(letterChar, countsPerLine));
         
-        float scaleFactor = maxScaleFactor*sin(ofMap(timeElapsed, 0, animationLength, 0, PI, true)) + baseScale;
+        float scaleFactor = maxScaleFactor*sin(ofMap(timeElapsedFromKeyPress, 0, animationLength, 0, PI, true)) + baseScale;
         string currLetter = text.substr(i, 1);
         ofPath scaledLetter = hersheyFont.getPaths(currLetter, scaleFactor).at(0);
         
@@ -84,7 +84,7 @@ void ofApp::processText(float baseScale, string text, float letterSpacing, float
             for (int k = 0; k < resampled.size(); k++) {
                 glm::vec3 point = resampled.getVertices().at(k);
                 
-                float yDisplacement = maxYDisplacement*sin(ofMap(timeElapsed, 0, animationLength, 0, PI));
+                float yDisplacement = maxYDisplacement*sin(ofMap(timeElapsedFromKeyPress, 0, animationLength, 0, PI));
                 ofDrawCircle(point.x + xOffset, point.y - yDisplacement, dotRadius*sqrt(scaleFactor));
             }
         }
