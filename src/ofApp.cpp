@@ -22,6 +22,7 @@ void ofApp::setup() {
     gui.add(maxVerticalDisplacement.set("maxVertDisplacement", 195, 10, 300));
     gui.add(maxScaleFactor.set("maxScaleFactor", 6, 1, 10));
     gui.add(widthFactor.set("widthFactor", 0.175, 0, 5));
+    gui.add(alphaValue.set("alphaValue", 200, 0, 255));
     
     hersheyFont.setColor(255);
     easyCam.setScale(1, -1, 1);
@@ -50,6 +51,12 @@ void ofApp::processText(float baseScale, string text, float letterSpacing, float
                 keyToTimeElapsed.erase(text[i]);
                 timeElapsedFromKeyPress = 0;
             }
+        }
+        
+        if (timeElapsedFromKeyPress > 0) {
+            ofSetColor(255, 255, 255, alphaValue);
+        } else {
+            ofSetColor(255);
         }
         
         char letterChar = text[i];

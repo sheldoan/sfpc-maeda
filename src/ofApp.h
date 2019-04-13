@@ -47,6 +47,7 @@ class ofApp : public ofBaseApp{
     ofParameter<float> maxVerticalDisplacement;
     ofParameter<float> maxScaleFactor;
     ofParameter<float> widthFactor;
+    ofParameter<float> alphaValue;
     
     
     map<int, float> keyToTimeElapsed;
