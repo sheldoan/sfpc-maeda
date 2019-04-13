@@ -17,12 +17,14 @@ void ofApp::setup() {
     gui.add(middleToBottomPadding.set("midToBottomPadding", 120, 0, 300));
     
     gui.add(animationLength.set("animationLength", 0.25, 0.1, 1.5));
-    gui.add(maxVerticalDisplacement.set("maxVertDisplacement", 100, 10, 300));
-    gui.add(maxScaleFactor.set("maxScaleFactor", 2, 1, 10));
+    gui.add(maxVerticalDisplacement.set("maxVertDisplacement", 195, 10, 300));
+    gui.add(maxScaleFactor.set("maxScaleFactor", 6, 1, 10));
     gui.add(widthFactor.set("widthFactor", 0.175, 0, 5));
     
     hersheyFont.setColor(255);
     easyCam.setScale(1, -1, 1);
+    
+    ofSetFrameRate(45);
 }
 
 //--------------------------------------------------------------
@@ -30,9 +32,11 @@ void ofApp::update(){
 
 }
 
-void ofApp::processText(float baseScale, string text, float letterSpacing) {
+void ofApp::processText(float baseScale, string text, float letterSpacing, float xOffset, float yOffset) {
+    ofPushMatrix();
+    ofTranslate(xOffset, yOffset);
+
     vector<ofPath> paths = hersheyFont.getPaths(text, baseScale);
-    
     map<char, vector<int>> charToPointCounts;
     for (int i = 0; i < paths.size(); i++) {
         float timeElapsed = 0;
@@ -72,17 +76,20 @@ void ofApp::processText(float baseScale, string text, float letterSpacing) {
         float xOffset = widthTilNow - widthFactor*widthOfScaledLetter;
         letter = scaledLetter;
         
+        float maxYDisplacement = (yOffset + maxVerticalDisplacement);
         vector<ofPolyline> lines = letter.getOutline();
         for (int j = 0; j < lines.size(); j++) {
             int pointCount = charToPointCounts[text[i]].at(j);
             ofPolyline resampled = lines.at(j).getResampledByCount(pointCount + 1);
             for (int k = 0; k < resampled.size(); k++) {
                 glm::vec3 point = resampled.getVertices().at(k);
-                float yDisplacement = maxVerticalDisplacement*sin(ofMap(timeElapsed, 0, animationLength, 0, PI));
+                
+                float yDisplacement = maxYDisplacement*sin(ofMap(timeElapsed, 0, animationLength, 0, PI));
                 ofDrawCircle(point.x + xOffset, point.y - yDisplacement, dotRadius*sqrt(scaleFactor));
             }
         }
     }
+    ofPopMatrix();
 }
 
 //--------------------------------------------------------------
@@ -95,20 +102,9 @@ void ofApp::draw(){
     ofSetColor(255);
     ofFill();
     
-    ofPushMatrix();
-    ofTranslate(-hersheyFont.getWidth(topRow, topScale) * 0.5, 0);
-    processText(topScale, topRow, 5);
-    ofPopMatrix();
-    
-    ofPushMatrix();
-    ofTranslate(-hersheyFont.getWidth(middleRow, middleScale) * 0.5, hersheyFont.getHeight(topScale) + topToMiddlePadding);
-    processText(middleScale, middleRow, 5.75);
-    ofPopMatrix();
-    
-    ofPushMatrix();
-    ofTranslate(-hersheyFont.getWidth(bottomRow, bottomScale) * 0.5, hersheyFont.getHeight(bottomScale) + middleToBottomPadding);
-    processText(bottomScale, bottomRow, 8);
-    ofPopMatrix();
+    processText(topScale, topRow, 5, -hersheyFont.getWidth(topRow, topScale) * 0.5, 0);
+    processText(middleScale, middleRow, 5.75, -hersheyFont.getWidth(middleRow, middleScale) * 0.5, hersheyFont.getHeight(topScale) + topToMiddlePadding);
+    processText(bottomScale, bottomRow, 8, -hersheyFont.getWidth(bottomRow, bottomScale) * 0.5, hersheyFont.getHeight(bottomScale) + middleToBottomPadding);
     
     easyCam.end();
     gui.draw();

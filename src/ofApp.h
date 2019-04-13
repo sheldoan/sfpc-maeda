@@ -25,7 +25,7 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-    void processText(float baseScale, string topRow, float letterSpacing);
+    void processText(float baseScale, string topRow, float letterSpacing, float xOffset, float yOffset);
     
     ofxHersheyFont hersheyFont;
     ofTrueTypeFont font;
