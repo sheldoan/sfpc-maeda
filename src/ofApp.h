@@ -42,6 +42,8 @@ class ofApp : public ofBaseApp{
     ofParameter<float> middleToBottomPadding;
     
     ofParameter<float> animationLength;
+    ofParameter<float> keyPressAnimationLength;
+    ofParameter<float> keyPressDisplacementFactor;
     ofParameter<float> maxVerticalDisplacement;
     ofParameter<float> maxScaleFactor;
     ofParameter<float> widthFactor;

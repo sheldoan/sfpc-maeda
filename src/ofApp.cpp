@@ -17,6 +17,8 @@ void ofApp::setup() {
     gui.add(middleToBottomPadding.set("midToBottomPadding", 120, 0, 300));
     
     gui.add(animationLength.set("animationLength", 0.25, 0.1, 1.5));
+    gui.add(keyPressAnimationLength.set("keyPressAnimationLength", 0.2, 0.01, 1));
+    gui.add(keyPressDisplacementFactor.set("keyPressDisplacementScaleFactor", 0.5, 0.01, 2));
     gui.add(maxVerticalDisplacement.set("maxVertDisplacement", 195, 10, 300));
     gui.add(maxScaleFactor.set("maxScaleFactor", 6, 1, 10));
     gui.add(widthFactor.set("widthFactor", 0.175, 0, 5));
@@ -44,7 +46,7 @@ void ofApp::processText(float baseScale, string text, float letterSpacing, float
         auto iterator = keyToTimeElapsed.find(text[i]);
         if (iterator != keyToTimeElapsed.end()) {
             timeElapsedFromKeyPress = ofGetElapsedTimef() - iterator->second;
-            if (timeElapsedFromKeyPress > animationLength) {
+            if (timeElapsedFromKeyPress > animationLength + keyPressAnimationLength) {
                 keyToTimeElapsed.erase(text[i]);
                 timeElapsedFromKeyPress = 0;
             }
@@ -65,7 +67,8 @@ void ofApp::processText(float baseScale, string text, float letterSpacing, float
         }
         charToPointCounts.insert(make_pair(letterChar, countsPerLine));
         
-        float scaleFactor = maxScaleFactor*sin(ofMap(timeElapsedFromKeyPress, 0, animationLength, 0, PI, true)) + baseScale;
+        // from 0 to keyPressAnimationLength, this will remain as baseScale
+        float scaleFactor = maxScaleFactor*sin(ofMap(timeElapsedFromKeyPress, keyPressAnimationLength, keyPressAnimationLength + animationLength, 0, PI, true)) + baseScale;
         string currLetter = text.substr(i, 1);
         ofPath scaledLetter = hersheyFont.getPaths(currLetter, scaleFactor).at(0);
         
@@ -84,7 +87,16 @@ void ofApp::processText(float baseScale, string text, float letterSpacing, float
             for (int k = 0; k < resampled.size(); k++) {
                 glm::vec3 point = resampled.getVertices().at(k);
                 
-                float yDisplacement = maxYDisplacement*sin(ofMap(timeElapsedFromKeyPress, 0, animationLength, 0, PI));
+                float yDisplacement;
+                if (timeElapsedFromKeyPress > 0 && timeElapsedFromKeyPress < keyPressAnimationLength) {
+                    float maxKeyPressDisplacement = keyPressDisplacementFactor * hersheyFont.getHeight(baseScale);
+                    
+                    yDisplacement = -1 * maxKeyPressDisplacement*sin(ofMap(timeElapsedFromKeyPress, 0, keyPressAnimationLength, 0, PI, true));
+                    cout << "Keypress displacement: " << yDisplacement << "/" << maxKeyPressDisplacement << endl;
+                    
+                } else {
+                    yDisplacement = maxYDisplacement*sin(ofMap(timeElapsedFromKeyPress, keyPressAnimationLength, animationLength +   keyPressAnimationLength, 0, PI, true));
+                }
                 ofDrawCircle(point.x + xOffset, point.y - yDisplacement, dotRadius*sqrt(scaleFactor));
             }
         }
