@@ -49,9 +49,8 @@ class ofApp : public ofBaseApp{
     ofParameter<float> widthFactor;
     ofParameter<float> alphaValue;
     
-    
     map<int, float> keyToTimeElapsed;
-   
-    
+
     ofEasyCam easyCam;
+    ofSoundPlayer keySound;
 };

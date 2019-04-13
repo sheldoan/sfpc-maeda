@@ -28,6 +28,7 @@ void ofApp::setup() {
     easyCam.setScale(1, -1, 1);
     
     ofSetFrameRate(60);
+    keySound.load("Typewriter-Key.mp3");
 }
 
 //--------------------------------------------------------------
@@ -133,6 +134,7 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
     if (key >= 'a' || key <= 'z') {
         keyToTimeElapsed.insert(make_pair(key, ofGetElapsedTimef()));
+        keySound.play();
     }
 }
 
