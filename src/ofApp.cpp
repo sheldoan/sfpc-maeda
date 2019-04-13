@@ -17,7 +17,7 @@ void ofApp::setup() {
     gui.add(middleToBottomPadding.set("midToBottomPadding", 120, 0, 300));
     
     gui.add(animationLength.set("animationLength", 0.25, 0.1, 1.5));
-    gui.add(keyPressAnimationLength.set("keyPressAnimationLength", 0.2, 0.01, 1));
+    gui.add(keyPressAnimationLength.set("keyPressAnimationLength", 0.075, 0.01, 1));
     gui.add(keyPressDisplacementFactor.set("keyPressDisplacementScaleFactor", 0.5, 0.01, 2));
     gui.add(maxVerticalDisplacement.set("maxVertDisplacement", 195, 10, 300));
     gui.add(maxScaleFactor.set("maxScaleFactor", 6, 1, 10));
@@ -26,7 +26,7 @@ void ofApp::setup() {
     hersheyFont.setColor(255);
     easyCam.setScale(1, -1, 1);
     
-    ofSetFrameRate(45);
+    ofSetFrameRate(60);
 }
 
 //--------------------------------------------------------------
