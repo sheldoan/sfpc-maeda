@@ -29,6 +29,7 @@ void ofApp::setup() {
     
     ofSetFrameRate(60);
     keySound.load("Typewriter-Key.mp3");
+    keySound.setMultiPlay(true);
 }
 
 //--------------------------------------------------------------
@@ -132,7 +133,7 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    if (key >= 'a' || key <= 'z') {
+    if (key >= 'a' || key <= 'z' && key != ' ') {
         keyToTimeElapsed.insert(make_pair(key, ofGetElapsedTimef()));
         keySound.play();
     }
