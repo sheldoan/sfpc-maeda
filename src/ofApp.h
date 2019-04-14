@@ -12,6 +12,8 @@ class ofApp : public ofBaseApp{
     
     void extracted(float baseScale, string &topRow);
     
+    void extracted();
+    
     void draw();
 
 		void keyPressed(int key);
@@ -26,6 +28,7 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     void processText(float baseScale, string topRow, float letterSpacing, float xOffset, float yOffset);
+    void drawBorder();
     
     ofxHersheyFont hersheyFont;
     ofTrueTypeFont font;
@@ -48,6 +51,9 @@ class ofApp : public ofBaseApp{
     ofParameter<float> maxScaleFactor;
     ofParameter<float> widthFactor;
     ofParameter<float> alphaValue;
+    ofParameter<float> borderRectYOffset;
+    ofParameter<float> borderRectHeightFactor;
+    ofParameter<float> borderRectCircleRad;
     
     map<int, float> keyToTimeElapsed;
 

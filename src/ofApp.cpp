@@ -13,7 +13,7 @@ void ofApp::setup() {
     gui.add(middleScale.set("middleScale", 1.5, 0.5, 10));
     gui.add(bottomScale.set("bottomScale", 2.325, 0.5, 10));
     
-    gui.add(topToMiddlePadding.set("topToMiddlePadding", 50, 0, 200));
+    gui.add(topToMiddlePadding.set("topToMiddlePadding", 55, 0, 200));
     gui.add(middleToBottomPadding.set("midToBottomPadding", 120, 0, 300));
     
     gui.add(animationLength.set("animationLength", 0.25, 0.1, 1.5));
@@ -23,6 +23,10 @@ void ofApp::setup() {
     gui.add(maxScaleFactor.set("maxScaleFactor", 6, 1, 10));
     gui.add(widthFactor.set("widthFactor", 0.175, 0, 5));
     gui.add(alphaValue.set("alphaValue", 200, 0, 255));
+    gui.add(borderRectYOffset.set("borderRectYOffset", -31, -200, 50));
+    gui.add(borderRectHeightFactor.set("borderRectHeight", 0.875, 0, 1));
+    gui.add(borderRectCircleRad.set("borderCircleRad", 8, 0, 100));
+    
     
     hersheyFont.setColor(255);
     easyCam.setScale(1, -1, 1);
@@ -113,6 +117,21 @@ void ofApp::processText(float baseScale, string text, float letterSpacing, float
     ofPopMatrix();
 }
 
+void ofApp::drawBorder() {
+    ofRectangle borderRect;
+    ofSetLineWidth(2);
+    borderRect.setFromCenter(0, borderRectYOffset, ofGetWidth()*0.85, ofGetHeight()*borderRectHeightFactor);
+    ofNoFill();
+    ofDrawRectangle(borderRect);
+    
+    ofFill();
+    ofSetColor(0);
+    ofDrawCircle(borderRect.getMinX(), borderRect.getMinY(), borderRectCircleRad);
+    ofDrawCircle(borderRect.getMaxX(), borderRect.getMinY(), borderRectCircleRad);
+    ofDrawCircle(borderRect.getMaxX(), borderRect.getMaxY(), borderRectCircleRad);
+    ofDrawCircle(borderRect.getMinX(), borderRect.getMaxY(), borderRectCircleRad);
+}
+
 //--------------------------------------------------------------
 void ofApp::draw(){
     easyCam.begin();
@@ -127,13 +146,16 @@ void ofApp::draw(){
     processText(middleScale, middleRow, 5.75, -hersheyFont.getWidth(middleRow, middleScale) * 0.5, hersheyFont.getHeight(topScale) + topToMiddlePadding);
     processText(bottomScale, bottomRow, 8, -hersheyFont.getWidth(bottomRow, bottomScale) * 0.5, hersheyFont.getHeight(bottomScale) + middleToBottomPadding);
     
+    
+    drawBorder();
+    
     easyCam.end();
     gui.draw();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    if (key >= 'a' || key <= 'z' && key != ' ') {
+    if ( (key >= 'a' && key <= 'z') || key == ',') {
         keyToTimeElapsed.insert(make_pair(key, ofGetElapsedTimef()));
         keySound.play();
     }
